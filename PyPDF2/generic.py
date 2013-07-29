@@ -35,7 +35,10 @@ __author__ = "Mathieu Fenniak"
 __author_email__ = "biziqe@mathieu.fenniak.net"
 
 import re
-
+try:
+    import filters
+except ImportError:
+    pass
 from .utils import readNonWhitespace, RC4_encrypt
 from .utils import b_, u_, chr_, ord_
 from .utils import PdfStreamError
