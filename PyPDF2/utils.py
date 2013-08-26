@@ -47,6 +47,7 @@ __author_email__ = "biziqe@mathieu.fenniak.net"
 #        proxy = staticmethod(proxy)
 
 #custom implementation of warnings.formatwarning 
+
 def _formatwarning(message, category, filename, lineno, line=None):
     file = filename.replace("/","\\").rsplit("\\",1)[1] # find the file name
     return "%s: %s [%s:%s]\n" % (category.__name__, message, file, lineno)
@@ -170,13 +171,18 @@ if sys.version_info[0] < 3:
 
 else:
     def b_(s):
-        return s.encode('latin-1')
-
+        try:
+            return s.encode('latin-1')
+        except:
+            return b
     def u_(s):
         return s
 
     def str_(b):
-        return b.decode('latin-1')
+        try:
+            return b.decode('latin-1')
+        except:
+            return b
 
     def ord_(b):
         return b

@@ -58,12 +58,24 @@ try:
     import utils
     import generic
 except ImportError:
-    import importlib
-    filters = importlib.import_module(".filters",package=__package__)
-    utils = importlib.import_module(".utils",package=__package__)
-    generic = importlib.import_module(".generic",package=__package__)
+    from . import filters
+    from . import utils
+    from . import generic
 
-from .generic import * 
+try:
+    from generic import *
+except ImportError:
+    from .generic import readObject, PdfObject, NullObject, BooleanObject, \
+         IndirectObject, FloatObject, NumberObject, createStringObject, \
+         readHexStringFromStream, readStringFromStream, ByteStringObject, \
+         TextStringObject, NameObject, DictionaryObject, TreeObject, \
+         StreamObject, ArrayObject, DecodedStreamObject, EncodedStreamObject, \
+         RectangleObject, Destination, Bookmark, encode_pdfdocencoding, \
+         decode_pdfdocencoding, _pdfDocEncoding, _pdfDocEncoding_rev, \
+         __author__, __author_email__
+         
+         
+
 #utils = __import__(__package__,fromlist=['utils'])
 import warnings
 from .utils import readNonWhitespace, readUntilWhitespace, ConvertFunctionsToVirtualList
@@ -104,9 +116,11 @@ class PdfFileWriter(object):
 
         # info object
         info = DictionaryObject()
-        info.update({
-                NameObject("/Producer"): createStringObject(u"Python PDF Library - http://pybrary.net/pyPdf/")
-                })
+        try:
+            info.update({NameObject("/Producer"): createStringObject(unicode("Python PDF Library - http://pybrary.net/pyPdf/"))})
+        except NameError:
+            # Python 3 strings are unicode
+            info.update({NameObject("/Producer"): createStringObject("Python PDF Library - http://pybrary.net/pyPdf/")})
         self._info = self._addObject(info)
 
         # root object
@@ -574,7 +588,7 @@ class PdfFileReader(object):
         self.xrefIndex = 0
         if hasattr(stream, 'mode') and 'b' not in stream.mode:
             warnings.warn("PdfFileReader stream/file object is not in binary mode. It may not be read correctly.", utils.PdfReadWarning)
-        if type(stream) in (str, unicode):
+        if type(stream) == str:
             fileobj = open(stream,'rb')
             stream = StringIO(fileobj.read())
             fileobj.close()
@@ -1727,7 +1741,11 @@ class PageObject(DictionaryObject):
     # be overhauled to provide more ordered text in the future.
     # @return a unicode string object
     def extractText(self):
-        text = u""
+        try:
+            text = unicode("")
+        except NameError:
+            # Python 3 strings are unicode
+            text = ""
         content = self["/Contents"].getObject()
         if not isinstance(content, ContentStream):
             content = ContentStream(content, self.pdf)

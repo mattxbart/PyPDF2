@@ -42,7 +42,8 @@ except ImportError:
 from .utils import readNonWhitespace, RC4_encrypt
 from .utils import b_, u_, chr_, ord_
 from .utils import PdfStreamError
-from .filters import *
+from .filters import FlateDecode, ASCIIHexDecode, LZWDecode, ASCII85Decode, \
+     decodeStreamData
 try:
     import utils
 except ImportError:

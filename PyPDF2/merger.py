@@ -27,7 +27,18 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-from .generic import *
+try:
+    from generic import *
+except ImportError:
+    from .generic import readObject, PdfObject, NullObject, BooleanObject, \
+         IndirectObject, FloatObject, NumberObject, createStringObject, \
+         readHexStringFromStream, readStringFromStream, ByteStringObject, \
+         TextStringObject, NameObject, DictionaryObject, TreeObject, \
+         StreamObject, ArrayObject, DecodedStreamObject, EncodedStreamObject, \
+         RectangleObject, Destination, Bookmark, encode_pdfdocencoding, \
+         decode_pdfdocencoding, _pdfDocEncoding, _pdfDocEncoding_rev, \
+         __author__, __author_email__
+
 from .pdf import PdfFileReader, PdfFileWriter
 try:
     from StringIO import StringIO
@@ -94,13 +105,8 @@ class PdfFileMerger(object):
         # it is a PdfFileReader, copy that reader's stream into a 
         # StringIO stream.
         # If fileobj is none of the above types, it is not modified
-        if type(fileobj) in (str, unicode):
+        if type(fileobj) == str:
             fileobj = file(fileobj, 'rb')
-            my_file = True
-        elif type(fileobj) == file:
-            fileobj.seek(0)
-            filecontent = fileobj.read()
-            fileobj = StringIO(filecontent)
             my_file = True
         elif type(fileobj) == PdfFileReader:
             orig_tell = fileobj.stream.tell()   
@@ -109,7 +115,11 @@ class PdfFileMerger(object):
             fileobj.stream.seek(orig_tell) # reset the stream to its original location
             fileobj = filecontent
             my_file = True
-            
+        elif hasattr(fileobj, 'read'):
+            fileobj.seek(0)
+            filecontent = str(fileobj.read())
+            fileobj = StringIO(filecontent)
+            my_file = True
         # Create a new PdfFileReader instance using the stream
         # (either file or StringIO) created above
         pdfr = PdfFileReader(fileobj, strict=self.strict)
